@@ -1,9 +1,5 @@
 # TPS Property Prediction using Machine Learning
 
-## Author
-
-Maria Riera
-
 This project presents a machine learning-based framework for predicting the physicochemical and mechanical properties of thermoplastic starch (TPS) materials as a function of formulation and processing conditions.
 
 The study integrates data extracted from scientific literature and applies a structured workflow following the CRISP-ML methodology, including data preprocessing, feature selection, model training, and evaluation.
@@ -50,3 +46,6 @@ To provide a predictive tool that supports the design and optimization of biodeg
 
 All trained models, preprocessing objects, and selected features are stored as `.rds` files to ensure full reproducibility of results and seamless deployment of the application.
 
+## Author
+
+Maria Riera

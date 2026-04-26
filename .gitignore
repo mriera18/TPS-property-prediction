@@ -1,0 +1,20 @@
+# R files
+.Rhistory
+.RData
+.Rproj.user/
+
+# RStudio
+*.Rproj
+
+# Data
+data/
+*.xlsx
+
+# Outputs
+modelos/
+preprocess/
+features/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -239,6 +239,11 @@ for (categoria in names(categorias)) {
     top_vars <- imp_top$Feature
     top_vars <- top_vars[top_vars %in% colnames(train)]
     
+    # Guardar features para cada modelo (para Shiny)
+    saveRDS(top_vars, paste0("features/features_rf_", target, ".rds"))
+    saveRDS(top_vars, paste0("features/features_xgb_", target, ".rds"))
+    saveRDS(top_vars, paste0("features/features_nn_", target, ".rds"))
+    
     if (length(top_vars) == 0) next
     
     cat("Top variables:\n")

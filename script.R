@@ -16,7 +16,7 @@ library(tidytext)
 library(reshape2)
 library(tidyr)
 
-# Creamos las carpetas una sola vez al inicio
+# Creación de carpetas
 dir.create("modelos", showWarnings = FALSE)
 dir.create("features", showWarnings = FALSE)
 dir.create("preprocess", showWarnings = FALSE)
@@ -69,7 +69,7 @@ df <- kNN(df, variable = variables_a_imputar, k = 5, imp_var = FALSE)
 df_num <- df %>% select(where(is.numeric))
 
 # =========================================================
-# 🔍 DIAGNÓSTICO DEL DATASET (PARA DISCUSIÓN DEL PAPER)
+# DIAGNÓSTICO DEL DATASET (PARA DISCUSIÓN DEL PAPER)
 # =========================================================
 
 # 1. % NA por variable
@@ -85,7 +85,7 @@ print(head(na_summary, 15))
 top_na <- na_summary %>% head(15)
 
 #####
-#FIGURA 2: Top variables con más NA###
+#FIGURA Top variables con más NA###
 
 ggplot(top_na, aes(x = reorder(Variable, NA_pct), y = NA_pct)) +
   geom_bar(stat = "identity") +
@@ -522,7 +522,7 @@ for (t in targets_cor) {
 }
 
 # =========================================================
-# FIGURA 3: Heatmaps de correlación (Top variables)
+# FIGURA: Heatmaps de correlación (Top variables)
 # =========================================================
 
 df_cor_total <- bind_rows(lista_correlaciones) %>%

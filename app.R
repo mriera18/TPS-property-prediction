@@ -10,7 +10,7 @@ library(xgboost)
 library(nnet)
 library(caret)
 
-# 1. CARGA DE METADATOS (Se ejecuta una vez al encender la app)
+# 1. CARGA DE METADATOS
 # Leemos el "mapa" que creaste con tu script principal
 tryCatch({
   metadata <- readRDS("modelos/metadata_shiny.rds")
@@ -65,7 +65,7 @@ ui <- page_sidebar(
       )
     ),
     
-    # Tarjeta de Metodología (Para dar peso científico)
+    # Tarjeta de Metodología 
     card(
       card_header("Información Metodológica"),
       card_body(
@@ -76,10 +76,9 @@ ui <- page_sidebar(
   )
 )
 
-# 3. LÓGICA DEL SERVIDOR (El cerebro matemático)
+# 3. LÓGICA DEL SERVIDOR
 server <- function(input, output, session) {
   
-  # Reactivo: Obtener qué modelo ganó para el target actual y sus variables
   info_target <- reactive({
     req(input$target_sel)
     target <- input$target_sel
@@ -105,7 +104,7 @@ server <- function(input, output, session) {
     })
   })
   
-  # Evento: Cuando el usuario presiona el botón "Proyectar"
+  # Cuando el usuario presiona el botón "Proyectar"
   observeEvent(input$btn_predict, {
     info <- info_target()
     

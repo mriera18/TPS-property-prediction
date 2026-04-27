@@ -6,14 +6,9 @@
 # RStudio
 *.Rproj
 
-# Data
+# Data (esto sí se queda)
 data/
 *.xlsx
-
-# Outputs
-modelos/
-preprocess/
-features/
 
 # OS
 .DS_Store

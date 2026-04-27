@@ -26,7 +26,7 @@ set.seed(123)
 # =========================================================
 # 2. CARGA DE DATOS
 # =========================================================
-df <- read_excel("C:/Users/UTM/Documents/Maestría Cs Datos/TESIS/DATOS Y PAPER/BD_version9.xlsx")
+# df <- read_excel("C:/Users/UTM/Documents/Maestría Cs Datos/TESIS/DATOS Y PAPER/BD_version9.xlsx")
 
 # =========================================================
 # 3. PREPROCESAMIENTO

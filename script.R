@@ -16,7 +16,7 @@ library(tidytext)
 library(reshape2)
 library(tidyr)
 
-# Creación de carpetas
+# Creamos las carpetas una sola vez al inicio
 dir.create("modelos", showWarnings = FALSE)
 dir.create("features", showWarnings = FALSE)
 dir.create("preprocess", showWarnings = FALSE)
@@ -27,7 +27,7 @@ set.seed(123)
 # 2. CARGA DE DATOS
 # =========================================================
 
-#read_excel("data/BD_version9.xlsx")
+#df <- read_excel()
 
 # =========================================================
 # 3. PREPROCESAMIENTO
@@ -63,13 +63,18 @@ variables_a_imputar <- c("process_temperature", "process_time", "rpm",
 
 df <- kNN(df, variable = variables_a_imputar, k = 5, imp_var = FALSE)
 
+df <- df %>%
+  mutate(
+    ratio_temp_agua = process_temperature / (water + 1e-5)
+  )
+
 # =========================================================
 # 4. VARIABLES NUMÉRICAS
 # =========================================================
 df_num <- df %>% select(where(is.numeric))
 
 # =========================================================
-# DIAGNÓSTICO DEL DATASET (PARA DISCUSIÓN DEL PAPER)
+# DIAGNÓSTICO DEL DATASET
 # =========================================================
 
 # 1. % NA por variable
@@ -130,7 +135,7 @@ cat("Número de datos por target:\n")
 print(n_por_target)
 
 #######
-##FIGURA 1: Número de datos por target
+##FIGURA Número de datos por target
 
 df_targets <- data.frame(
   Target = names(n_por_target),
@@ -169,17 +174,13 @@ limpiar_por_target <- function(df, target) {
     select(where(~ sum(is.na(.)) == 0))
 }
 
-#
+# =========================================================
+# 7. INICIALIZACIÓN DE VARIABLES
 # =========================================================
 resultados <- NULL
-
-# =========================================================
-# LISTA PARA GUARDAR IMPORTANCIAS
-# =========================================================
 lista_importancias <- list()
 lista_correlaciones <- list()
 predicciones <- list()
-
 
 # =========================================================
 # 8. LOOP PRINCIPAL
@@ -196,13 +197,25 @@ for (categoria in names(categorias)) {
     cat("\nProcesando:", target, "\n")
     
     # -----------------------------
-    # Limpieza específica
+    # Limpieza específica y Colinealidad
     # -----------------------------
     df_modelo <- limpiar_por_target(df_num, target)
     
     if (nrow(df_modelo) < 30) next
     
-    cat("Número de variables:", ncol(df_modelo)-1, "\n")
+    # ELIMINAR COLINEALIDAD (Umbral > 0.85)
+    pred_vars <- df_modelo %>% select(-all_of(target))
+    cor_matrix <- cor(pred_vars, use = "pairwise.complete.obs")
+    
+    altamente_correlacionadas <- findCorrelation(cor_matrix, cutoff = 0.85)
+    
+    if (length(altamente_correlacionadas) > 0) {
+      cat("  Variables colineales removidas:", names(pred_vars)[altamente_correlacionadas], "\n")
+      pred_vars <- pred_vars[, -altamente_correlacionadas]
+      df_modelo <- bind_cols(pred_vars, df_modelo %>% select(all_of(target)))
+    }
+    
+    cat("Número de variables tras filtro:", ncol(df_modelo)-1, "\n")
     
     # -----------------------------
     # División 70:20:10
@@ -270,13 +283,14 @@ for (categoria in names(categorias)) {
       
       matriz_cor <- cor(df_cor, use = "pairwise.complete.obs")
       matriz_cor[upper.tri(matriz_cor)] <- NA
+      diag(matriz_cor) <- NA  # Borra la diagonal de 1.0s
       
       df_cor_long <- reshape2::melt(matriz_cor)
       df_cor_long$Target <- target
       
       lista_correlaciones[[target]] <- df_cor_long
     }
-  
+    
     # =========================================================
     # MODELOS
     # =========================================================
@@ -310,7 +324,7 @@ for (categoria in names(categorias)) {
     
     train_nn$y <- train[[target]]
     
-    modelo_nn <- nnet(y ~ ., data = train_nn, size = 5, linout = TRUE, trace = FALSE)
+    modelo_nn <- nnet(y ~ ., data = train_nn, size = 5, decay = 0.1, linout = TRUE, trace = FALSE, maxit = 500)
     
     pred_nn_train <- predict(modelo_nn, train_nn)
     pred_nn_val   <- predict(modelo_nn, val_nn)
@@ -397,7 +411,7 @@ for (categoria in names(categorias)) {
       MAE_NN_val   = mae(val[[target]], pred_nn_val),
       MAE_NN_test  = mae(test[[target]], pred_nn_test)
     ))
-}}
+  }}
 
 # =========================================================
 # GUARDAR PREDICCIONES POR TARGET
@@ -522,7 +536,7 @@ for (t in targets_cor) {
 }
 
 # =========================================================
-# FIGURA: Heatmaps de correlación (Top variables)
+# FIGURA 3: Heatmaps de correlación (Top variables)
 # =========================================================
 
 df_cor_total <- bind_rows(lista_correlaciones) %>%
